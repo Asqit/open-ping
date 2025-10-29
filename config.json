@@ -1,0 +1,6 @@
+{
+  "interval": "1m",
+  "targets": [
+    { "name": "praceprojuniora", "url": "https://www.praceprojuniora.cz" }
+  ]
+}
