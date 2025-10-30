@@ -1,6 +1,7 @@
 {
   "interval": "1m",
   "targets": [
-    { "name": "praceprojuniora", "url": "https://www.praceprojuniora.cz" }
+    { "name": "google", "url": "https://www.google.com" },
+    { "name": "seznam", "url": "https://www.seznam.cz" }
   ]
 }

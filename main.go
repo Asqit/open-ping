@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "github.com/asqit/open-ping/web"
 
 // Basic flow:
 // 1. Read config
@@ -11,10 +11,14 @@ import "fmt"
 // 3. Print to STDOUT stream
 
 func main() {
-	cfg, err := Read_config()
+	init_db()
+	defer close_db()
+	go web.Start_dashboard(db)
+
+	cfg, err := read_config()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(cfg.Interval)
+	run_monitor(cfg)
 }
