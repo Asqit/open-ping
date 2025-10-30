@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -32,7 +31,6 @@ func init_db() {
 }
 
 func save_log(target string, status int, success bool, latency int) {
-	fmt.Println(target, status, success, latency)
 	if db == nil {
 		log.Fatal("Database not initialized. Call InitDB() first.")
 	}

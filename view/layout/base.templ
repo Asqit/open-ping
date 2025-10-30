@@ -1,0 +1,19 @@
+package layout
+
+templ Base(children ...templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>OpenPing | Dashboard</title>
+			<link href="/static/index.css" rel="stylesheet"/>
+			<script async defer src="/static/htmx.min.js"></script>
+		</head>
+		<body class="bg-black text-white font-mono">
+			for _, child := range children {
+				@child
+			}
+		</body>
+	</html>
+}

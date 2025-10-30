@@ -1,24 +1,25 @@
 package main
 
-import "github.com/asqit/open-ping/web"
+import (
+	"fmt"
 
-// Basic flow:
-// 1. Read config
-// 2. Every interval
-// 	- ping each target
-// 	- measure HTTP response status & latency
-// 	- log result to sqlite
-// 3. Print to STDOUT stream
+	"github.com/asqit/open-ping/web"
+)
 
 func main() {
+	fmt.Println(`
+░█▀█░█▀█░█▀▀░█▀█░░░░░█▀█░▀█▀░█▀█░█▀▀
+░█░█░█▀▀░█▀▀░█░█░▄▄▄░█▀▀░░█░░█░█░█░█
+░▀▀▀░▀░░░▀▀▀░▀░▀░░░░░▀░░░▀▀▀░▀░▀░▀▀▀
+====================================`)
 	init_db()
 	defer close_db()
-	go web.Start_dashboard(db)
+	web.Start_dashboard(db)
 
-	cfg, err := read_config()
-	if err != nil {
-		panic(err)
-	}
-
-	run_monitor(cfg)
+	//cfg, err := read_config()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//run_monitor(cfg)
 }

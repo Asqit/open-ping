@@ -1,0 +1,40 @@
+package share
+
+import "github.com/asqit/open-ping/types"
+
+templ TableRow(p types.PingView) {
+	<div class="p-6 border border-zinc-800">
+		<div class="mb-6">
+			<h2 class="font-bold">TARGET_NAME</h2>
+			<h3 class="text-sm text-zinc-500">target_url</h3>
+		</div>
+		<ul class="grid grid-cols-2 gap-4 mb-6">
+			<li>
+				<div class="text-zinc-500 text-sm">CURRENT</div>
+				<div>value</div>
+				<div class="text-zinc-500 text-sm">unit</div>
+			</li>
+			<li>
+				<div class="text-zinc-500 text-sm">AVG</div>
+				<div>value</div>
+				<div class="text-zinc-500 text-sm">unit</div>
+			</li>
+			<li>
+				<div class="text-zinc-500 text-sm">UPTIME</div>
+				<div>value</div>
+				<div class="text-zinc-500 text-sm">unit</div>
+			</li>
+			<li>
+				<div class="text-zinc-500 text-sm">SUCCESS</div>
+				<div>value</div>
+				<div class="text-zinc-500 text-sm">unit</div>
+			</li>
+		</ul>
+		<div class="space-y-2">
+			<div class="flex items-center justify-between">
+				<span class="text-[10px] text-muted-foreground tracking-widest">90 DAY HISTORY</span>
+				<span class="text-[10px] text-muted-foreground tabular-nums">100 PINGS</span>
+			</div>
+		</div>
+	</div>
+}
