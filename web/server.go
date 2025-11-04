@@ -2,60 +2,35 @@ package web
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/asqit/open-ping/helpers"
-	"github.com/asqit/open-ping/types"
 	"github.com/asqit/open-ping/view"
 	"github.com/asqit/open-ping/view/layout"
 	"github.com/asqit/open-ping/view/share"
 )
 
-func get_pings(db *sql.DB) ([]types.PingView, error) {
-	rows, err := db.Query("SELECT id, target, status, success, latency, timestamp FROM pings ORDER BY timestamp DESC LIMIT 100")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+func StartDashboard(db *sql.DB) {
+	fmt.Print("Starting web dashboard.........")
 
-	var pings []types.PingView
-	for rows.Next() {
-		var p types.Ping
-		if err := rows.Scan(&p.ID, &p.Target, &p.Status, &p.Success, &p.Latency, &p.Timestamp); err != nil {
-			log.Println("scan:", err)
-			continue
-		}
-
-		pings = append(pings, types.PingView{
-			ID:        p.ID,
-			Target:    helpers.ToString(p.Target),
-			Status:    helpers.ToInt64(p.Status),
-			Success:   helpers.ToBool(p.Success),
-			Latency:   helpers.ToInt64(p.Latency),
-			Timestamp: p.Timestamp.Time.Format("2006-01-02 15:04:05"),
-		})
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return pings, nil
-}
-
-func Start_dashboard(db *sql.DB) {
+	// Static assets
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	pings, err := get_pings(db)
-	if err != nil {
-		panic(err)
-	}
 
-	c := layout.Base(view.Index(share.Dashboard(pings)))
-	http.Handle("/", templ.Handler(c))
+	// Main dashboard page
+	dashboard := share.Dashboard()
+	index := view.Index(dashboard)
+	page := layout.Base(index)
+	http.Handle("/", templ.Handler(page))
+
+	// APIs
 	http.Handle("/api/pings/paginate", PaginatePings(db))
+	http.Handle("/api/targets", GetDistinctTargets(db))
+	http.Handle("/api/targets/html", GetTargetsHTML(db)) // used by HTMX
 
+	fmt.Print("[OK]\n")
+	fmt.Println("Local Machine: http://127.0.0.1:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

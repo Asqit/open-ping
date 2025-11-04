@@ -19,3 +19,12 @@ type PingView struct {
 	Latency   int64
 	Timestamp string
 }
+
+type TargetView struct {
+	Name          string  // target hostname or label
+	URL           string  // same as Name for now
+	CurrentUptime float64 // percentage of successful pings
+	AverageUptime float64 // (placeholder) same as CurrentUptime until 90-day avg calc is added
+	AvgLatency    float64 // average latency (ms)
+	HistoryCount  int     // number of pings in total
+}

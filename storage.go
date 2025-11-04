@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -10,6 +11,7 @@ import (
 var db *sql.DB
 
 func init_db() {
+	fmt.Print("initiating database............")
 	var err error
 	db, err = sql.Open("sqlite3", "openping.db")
 	if err != nil {
@@ -28,6 +30,8 @@ func init_db() {
 	if err != nil {
 		log.Fatalf("Failed to create table: %v", err)
 	}
+
+	fmt.Println("[OK]")
 }
 
 func save_log(target string, status int, success bool, latency int) {

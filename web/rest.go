@@ -7,9 +7,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/asqit/open-ping/helpers"
 	"github.com/asqit/open-ping/types"
+	"github.com/asqit/open-ping/view/share"
 )
+
+// =============================
+// Pagination for all pings (as-is)
+// =============================
 
 type PaginatePingsResponse struct {
 	Data []types.PingView `json:"data"`
@@ -34,11 +40,9 @@ func PaginatePings(db *sql.DB) http.HandlerFunc {
 
 		rows, err := db.Query("SELECT * FROM pings ORDER BY id DESC LIMIT ? OFFSET ?", limit, offset)
 		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("Internal Server Error"))
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
 		defer rows.Close()
 
 		var pings []types.PingView
@@ -59,12 +63,6 @@ func PaginatePings(db *sql.DB) http.HandlerFunc {
 			})
 		}
 
-		if err := rows.Err(); err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("Internal Server Error"))
-			return
-		}
-
 		bytes, err := json.Marshal(PaginatePingsResponse{Data: pings})
 		if err != nil {
 			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
@@ -72,7 +70,86 @@ func PaginatePings(db *sql.DB) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 	}
+}
+
+// =============================
+// Distinct Targets as JSON
+// =============================
+
+func GetDistinctTargets(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query("SELECT DISTINCT target FROM pings")
+		if err != nil {
+			http.Error(w, "DB query failed", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var targets []string
+		for rows.Next() {
+			var t string
+			if err := rows.Scan(&t); err != nil {
+				log.Println("scan:", err)
+				continue
+			}
+			targets = append(targets, t)
+		}
+
+		type response struct {
+			Targets []string `json:"targets"`
+		}
+
+		bytes, err := json.Marshal(response{Targets: targets})
+		if err != nil {
+			http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
+	}
+}
+
+// =============================
+// HTMX Endpoint for Dashboard Grid
+// =============================
+
+func GetTargetsHTML(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query(`
+			SELECT target,
+			       COUNT(*) as total,
+			       SUM(success) as success_count,
+			       AVG(latency) as avg_latency
+			FROM pings
+			GROUP BY target
+			ORDER BY target ASC;
+		`)
+		if err != nil {
+			http.Error(w, "DB query failed", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var targets []types.TargetView
+		for rows.Next() {
+			var t types.TargetView
+			var total, successCount int
+			if err := rows.Scan(&t.Name, &total, &successCount, &t.AvgLatency); err != nil {
+				log.Println("scan:", err)
+				continue
+			}
+			t.URL = t.Name
+			t.CurrentUptime = (float64(successCount) / float64(total)) * 100
+			t.AverageUptime = t.CurrentUptime // later: compute real 90-day avg
+			t.HistoryCount = total
+			targets = append(targets, t)
+		}
+
+		// Render with Templ
+		c := share.TargetList(targets)
+		templ.Handler(c).ServeHTTP(w, r)
+	})
 }

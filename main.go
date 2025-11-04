@@ -3,23 +3,20 @@ package main
 import (
 	"fmt"
 
+	"github.com/asqit/open-ping/helpers"
 	"github.com/asqit/open-ping/web"
 )
 
 func main() {
-	fmt.Println(`
-░█▀█░█▀█░█▀▀░█▀█░░░░░█▀█░▀█▀░█▀█░█▀▀
-░█░█░█▀▀░█▀▀░█░█░▄▄▄░█▀▀░░█░░█░█░█░█
-░▀▀▀░▀░░░▀▀▀░▀░▀░░░░░▀░░░▀▀▀░▀░▀░▀▀▀
-====================================`)
+	helpers.Print_header()
 	init_db()
 	defer close_db()
-	web.Start_dashboard(db)
+	go web.StartDashboard(db)
 
-	//cfg, err := read_config()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//run_monitor(cfg)
+	cfg, err := read_config()
+	if err != nil {
+		panic(err)
+	}
+	run_monitor(cfg)
+	fmt.Printf("Watching: %d", len(cfg.Targets))
 }

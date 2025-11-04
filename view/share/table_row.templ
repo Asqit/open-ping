@@ -1,40 +1,33 @@
 package share
 
-import "github.com/asqit/open-ping/types"
+import (
+	"fmt"
+	"github.com/asqit/open-ping/types"
+)
 
-templ TableRow(p types.PingView) {
-	<div class="p-6 border border-zinc-800">
-		<div class="mb-6">
-			<h2 class="font-bold">TARGET_NAME</h2>
-			<h3 class="text-sm text-zinc-500">target_url</h3>
+templ TableRow(t types.TargetView) {
+	<div class="p-6 border border-zinc-800 rounded-xl bg-zinc-900/20">
+		<div class="mb-4">
+			<h2 class="font-bold">{t.Name}</h2>
+			<h3 class="text-sm text-zinc-500">{t.URL}</h3>
 		</div>
-		<ul class="grid grid-cols-2 gap-4 mb-6">
+		<ul class="grid grid-cols-2 gap-4 text-sm">
 			<li>
-				<div class="text-zinc-500 text-sm">CURRENT</div>
-				<div>value</div>
-				<div class="text-zinc-500 text-sm">unit</div>
+				<div class="text-zinc-500">CURRENT</div>
+				<div>{fmt.Sprintf("%.2f%%", t.CurrentUptime)}</div>
 			</li>
 			<li>
-				<div class="text-zinc-500 text-sm">AVG</div>
-				<div>value</div>
-				<div class="text-zinc-500 text-sm">unit</div>
+				<div class="text-zinc-500">AVG</div>
+				<div>{fmt.Sprintf("%.2f%%", t.AverageUptime)}</div>
 			</li>
 			<li>
-				<div class="text-zinc-500 text-sm">UPTIME</div>
-				<div>value</div>
-				<div class="text-zinc-500 text-sm">unit</div>
+				<div class="text-zinc-500">LATENCY</div>
+				<div>{fmt.Sprintf("%.1f ms", t.AvgLatency)}</div>
 			</li>
 			<li>
-				<div class="text-zinc-500 text-sm">SUCCESS</div>
-				<div>value</div>
-				<div class="text-zinc-500 text-sm">unit</div>
+				<div class="text-zinc-500">HISTORY</div>
+				<div>{t.HistoryCount} pings</div>
 			</li>
 		</ul>
-		<div class="space-y-2">
-			<div class="flex items-center justify-between">
-				<span class="text-[10px] text-muted-foreground tracking-widest">90 DAY HISTORY</span>
-				<span class="text-[10px] text-muted-foreground tabular-nums">100 PINGS</span>
-			</div>
-		</div>
 	</div>
 }
