@@ -2,6 +2,10 @@
   "interval": "1m",
   "targets": [
     { "name": "google", "url": "https://www.google.com" },
-    { "name": "seznam", "url": "https://www.seznam.cz" }
+    { "name": "github", "url": "https://github.com" },
+    { "name": "aws", "url": "https://aws.amazon.com" },
+    { "name": "cloudflare", "url": "https://www.cloudflare.com" },
+    { "name": "vercel", "url": "https://vercel.com" },
+    { "name": "netlify", "url": "https://www.netlify.com" }
   ]
 }

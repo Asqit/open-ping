@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.go text eol=lf
+*.templ text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.db binary

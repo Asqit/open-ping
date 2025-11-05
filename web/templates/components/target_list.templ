@@ -1,0 +1,9 @@
+package components
+
+import "github.com/asqit/open-ping/pkg/models"
+
+templ TargetList(targets []models.TargetView) {
+	for _, t := range targets {
+		@TableRow(t)
+	}
+}

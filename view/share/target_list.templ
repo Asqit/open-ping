@@ -1,9 +1,0 @@
-package share
-
-import "github.com/asqit/open-ping/types"
-
-templ TargetList(targets []types.TargetView) {
-	for _, t := range targets {
-		@TableRow(t)
-	}
-}

@@ -1,0 +1,22 @@
+run:
+  timeout: 5m
+  tests: false
+
+linters:
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+
+linters-settings:
+  gofmt:
+    simplify: true
+
+issues:
+  exclude-dirs:
+    - tmp
+    - web/templates

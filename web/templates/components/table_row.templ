@@ -1,0 +1,59 @@
+package components
+
+import (
+	"fmt"
+	"github.com/asqit/open-ping/pkg/models"
+)
+
+func getColorClass(uptime float64) string {
+	if uptime >= 95 {
+		return "bg-green-500"
+	} else if uptime >= 80 {
+		return "bg-yellow-500"
+	} else if uptime > 0 {
+		return "bg-red-500"
+	}
+	return "bg-zinc-700"
+}
+
+templ TableRow(t models.TargetView) {
+	<div class="p-6 border border-zinc-800 rounded-xl bg-zinc-900/20">
+		<div class="mb-4">
+			<h2 class="font-bold">{t.Name}</h2>
+			<h3 class="text-sm text-zinc-500">{t.URL}</h3>
+		</div>
+		<ul class="grid grid-cols-2 gap-4 text-sm mb-4">
+			<li>
+				<div class="text-zinc-500">CURRENT</div>
+				<div>{fmt.Sprintf("%.2f%%", t.CurrentUptime)}</div>
+			</li>
+			<li>
+				<div class="text-zinc-500">AVG</div>
+				<div>{fmt.Sprintf("%.2f%%", t.AverageUptime)}</div>
+			</li>
+			<li>
+				<div class="text-zinc-500">LATENCY</div>
+				<div>{fmt.Sprintf("%.1f ms", t.AvgLatency)}</div>
+			</li>
+			<li>
+				<div class="text-zinc-500">HISTORY</div>
+				<div>{t.HistoryCount} pings</div>
+			</li>
+		</ul>
+		<div class="pt-4 border-t border-zinc-800">
+			<div class="text-xs text-zinc-500 mb-2">90-DAY UPTIME</div>
+			<div class="flex gap-1 h-4">
+				if len(t.DailyHistory) > 0 {
+					for _, day := range t.DailyHistory {
+						<div
+							class={ "flex-1", getColorClass(day.Uptime) }
+							title={ fmt.Sprintf("%s: %.1f%%", day.Date, day.Uptime) }
+						></div>
+					}
+				} else {
+					<div class="text-xs text-zinc-600 italic">No data yet</div>
+				}
+			</div>
+		</div>
+	</div>
+}

@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tailwindcss -i ./static/dev.css -o ./static/index.css --minify",
-    "watch": "tailwindcss -i ./static/dev.css -o ./static/index.css --watch"
+    "build": "tailwindcss -i ./web/static/css/dev.css -o ./web/static/css/index.css --minify",
+    "watch": "tailwindcss -i ./web/static/css/dev.css -o ./web/static/css/index.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.16",
