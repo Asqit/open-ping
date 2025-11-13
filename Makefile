@@ -7,7 +7,7 @@ run: templ
 	@go run ./cmd/openping
 
 dev:
-	@air
+	@air & bun watch
 
 templ:
 	@templ generate

@@ -21,7 +21,8 @@ func New(s storage.Storage) *Monitor {
 
 func (m *Monitor) Ping(name, url string) {
 	start := time.Now()
-	resp, err := http.Get(url)
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(url)
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -31,13 +32,16 @@ func (m *Monitor) Ping(name, url string) {
 	defer resp.Body.Close()
 
 	fmt.Printf("[%s] %s → %d OK, %v\n", time.Now().Format("15:04:05"), name, resp.StatusCode, elapsed)
-	m.storage.SavePing(name, url, resp.StatusCode, int(elapsed.Milliseconds()), resp.StatusCode < 300)
+	m.storage.SavePing(name, url, resp.StatusCode, int(elapsed.Milliseconds()), resp.StatusCode >= 200 && resp.StatusCode < 300)
 }
 
 func (m *Monitor) Run(cfg *config.Config) {
-	interval, _ := time.ParseDuration(cfg.Interval)
+	interval, err := time.ParseDuration(cfg.Interval)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("Watching: %d\n", len(cfg.Targets))
-	
+
 	for {
 		var wg sync.WaitGroup
 		for _, target := range cfg.Targets {

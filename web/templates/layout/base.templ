@@ -7,13 +7,37 @@ templ Base(children ...templ.Component) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>OpenPing | Dashboard</title>
+			<meta name="description" content="Simple self-contained uptime monitoring"/>
+			<meta name="theme-color" content="#000000"/>
+			<link rel="manifest" href="/static/manifest.json"/>
+			<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png"/>
+			<link rel="icon" type="image/png" sizes="512x512" href="/static/icons/icon-512.png"/>
+			<link rel="apple-touch-icon" href="/static/icons/icon-192.png"/>
 			<link href="/static/css/index.css" rel="stylesheet"/>
 			<script src="/static/js/htmx.min.js"></script>
+			<style>
+				@keyframes fade-in {
+					from { opacity: 0; transform: translateY(10px); }
+					to { opacity: 1; transform: translateY(0); }
+				}
+				.animate-fade-in {
+					animation: fade-in 0.5s ease-out;
+				}
+			</style>
 		</head>
 		<body class="bg-black text-white font-mono">
 			for _, child := range children {
 				@child
 			}
+			<script>
+				if ('serviceWorker' in navigator) {
+					window.addEventListener('load', () => {
+						navigator.serviceWorker.register('/static/js/sw.js')
+							.then(reg => console.log('Service Worker registered'))
+							.catch(err => console.log('Service Worker registration failed'));
+					});
+				}
+			</script>
 		</body>
 	</html>
 }

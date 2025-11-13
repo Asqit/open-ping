@@ -3,8 +3,10 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/a-h/templ"
@@ -184,4 +186,106 @@ func (s *Server) getDailyHistory(target string) []models.DayStatus {
 	}
 
 	return history
+}
+
+func (s *Server) PerTargetExport(w http.ResponseWriter, r *http.Request) {
+	var target = r.PathValue("target")
+	rows, err := s.db.Query(`
+    SELECT id, target, target_website, status, success, latency, timestamp
+    FROM pings
+    WHERE target = ?
+    ORDER BY timestamp ASC;
+`, target)
+	if err != nil {
+		http.Error(w, "failed database operation", http.StatusInternalServerError)
+		fmt.Fprint(os.Stderr, err)
+		return
+	}
+	defer rows.Close()
+
+	var pings []models.PingView
+	for rows.Next() {
+		var p models.Ping
+		if err := rows.Scan(
+			&p.ID,
+			&p.Target,
+			&p.TargetWebsite,
+			&p.Status,
+			&p.Success,
+			&p.Latency,
+			&p.Timestamp,
+		); err != nil {
+			log.Println("scan:", err)
+			continue
+		}
+
+		pings = append(pings, models.PingView{
+			ID:            p.ID,
+			Target:        toString(p.Target),
+			TargetWebsite: toString(p.TargetWebsite),
+			Status:        toInt64(p.Status),
+			Success:       toBool(p.Success),
+			Latency:       toInt64(p.Latency),
+			Timestamp:     p.Timestamp.Time.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	bytes, err := json.Marshal(PaginatePingsResponse{Data: pings})
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bytes)
+}
+
+func (s *Server) ExportAll(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.db.Query(`
+    SELECT id, target, target_website, status, success, latency, timestamp
+    FROM pings
+    ORDER BY timestamp ASC;
+`)
+	if err != nil {
+		http.Error(w, "failed database operation", http.StatusInternalServerError)
+		fmt.Fprint(os.Stderr, err)
+		return
+	}
+	defer rows.Close()
+
+	var pings []models.PingView
+	for rows.Next() {
+		var p models.Ping
+		if err := rows.Scan(
+			&p.ID,
+			&p.Target,
+			&p.TargetWebsite,
+			&p.Status,
+			&p.Success,
+			&p.Latency,
+			&p.Timestamp,
+		); err != nil {
+			log.Println("scan:", err)
+			continue
+		}
+
+		pings = append(pings, models.PingView{
+			ID:            p.ID,
+			Target:        toString(p.Target),
+			TargetWebsite: toString(p.TargetWebsite),
+			Status:        toInt64(p.Status),
+			Success:       toBool(p.Success),
+			Latency:       toInt64(p.Latency),
+			Timestamp:     p.Timestamp.Time.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	bytes, err := json.Marshal(PaginatePingsResponse{Data: pings})
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bytes)
 }

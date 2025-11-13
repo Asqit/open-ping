@@ -16,44 +16,88 @@ func getColorClass(uptime float64) string {
 	return "bg-zinc-700"
 }
 
+func getStatusBadge(uptime float64) string {
+	if uptime >= 95 {
+		return "bg-green-500/20 text-green-400 border-green-500/50"
+	} else if uptime >= 80 {
+		return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50"
+	}
+	return "bg-red-500/20 text-red-400 border-red-500/50"
+}
+
+func getStatusText(uptime float64) string {
+	if uptime >= 95 {
+		return "ONLINE"
+	} else if uptime >= 80 {
+		return "DEGRADED"
+	}
+	return "DOWN"
+}
+
 templ TableRow(t models.TargetView) {
-	<div class="p-6 border border-zinc-800 rounded-xl bg-zinc-900/20">
-		<div class="mb-4">
-			<h2 class="font-bold">{t.Name}</h2>
-			<h3 class="text-sm text-zinc-500">{t.URL}</h3>
+	<div class="group p-4 md:p-6 border border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/40 hover:border-zinc-700 hover:shadow-lg hover:shadow-zinc-900/50 hover:-translate-y-1 transition-all duration-300">
+		<div class="mb-4 md:mb-4 flex items-start justify-between gap-2">
+			<div class="min-w-0 flex-1">
+				<h2 class="font-bold text-base md:text-lg truncate">{t.Name}</h2>
+				<h3 class="text-xs md:text-sm text-zinc-500 truncate">{t.URL}</h3>
+			</div>
+			<span class={ "px-2 py-1 text-[10px] md:text-xs font-bold border rounded whitespace-nowrap flex-shrink-0", getStatusBadge(t.CurrentUptime) }>
+				{getStatusText(t.CurrentUptime)}
+			</span>
 		</div>
-		<ul class="grid grid-cols-2 gap-4 text-sm mb-4">
-			<li>
-				<div class="text-zinc-500">CURRENT</div>
-				<div>{fmt.Sprintf("%.2f%%", t.CurrentUptime)}</div>
+		<ul class="grid grid-cols-2 gap-3 md:gap-4 text-sm mb-4 md:mb-4">
+			<li class="transition-colors hover:text-green-400">
+				<div class="text-zinc-500 text-[10px] md:text-xs">CURRENT</div>
+				<div class="font-mono text-base md:text-lg font-bold">{fmt.Sprintf("%.2f%%", t.CurrentUptime)}</div>
 			</li>
-			<li>
-				<div class="text-zinc-500">AVG</div>
-				<div>{fmt.Sprintf("%.2f%%", t.AverageUptime)}</div>
+			<li class="transition-colors hover:text-blue-400">
+				<div class="text-zinc-500 text-[10px] md:text-xs">AVG</div>
+				<div class="font-mono text-base md:text-lg font-bold">{fmt.Sprintf("%.2f%%", t.AverageUptime)}</div>
 			</li>
-			<li>
-				<div class="text-zinc-500">LATENCY</div>
-				<div>{fmt.Sprintf("%.1f ms", t.AvgLatency)}</div>
+			<li class="transition-colors hover:text-cyan-400">
+				<div class="text-zinc-500 text-[10px] md:text-xs">LATENCY</div>
+				<div class="font-mono text-base md:text-lg font-bold">{fmt.Sprintf("%.1f", t.AvgLatency)}<span class="text-xs md:text-sm text-zinc-500">ms</span></div>
 			</li>
-			<li>
-				<div class="text-zinc-500">HISTORY</div>
-				<div>{t.HistoryCount} pings</div>
+			<li class="transition-colors hover:text-purple-400">
+				<div class="text-zinc-500 text-[10px] md:text-xs">HISTORY</div>
+				<div class="font-mono text-base md:text-lg font-bold">{t.HistoryCount}<span class="text-xs md:text-sm text-zinc-500">pings</span></div>
 			</li>
 		</ul>
-		<div class="pt-4 border-t border-zinc-800">
-			<div class="text-xs text-zinc-500 mb-2">90-DAY UPTIME</div>
-			<div class="flex gap-1 h-4">
-				if len(t.DailyHistory) > 0 {
+		<div class="pt-3 md:pt-4 border-t border-zinc-800">
+			<div class="flex justify-between items-center mb-2">
+				<div class="text-[10px] md:text-xs text-zinc-500">90-DAY UPTIME</div>
+				<a
+					href={ templ.SafeURL("/api/targets/" + t.Name + "/export") }
+					download
+					class="text-[10px] md:text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1"
+				>
+					<span>↓</span>
+					<span class="hidden sm:inline">Export CSV</span>
+					<span class="sm:hidden">CSV</span>
+				</a>
+			</div>
+			if len(t.DailyHistory) > 0 {
+				<!-- Mobile: Grid layout -->
+				<div class="grid grid-cols-13 gap-[2px] md:hidden">
 					for _, day := range t.DailyHistory {
 						<div
-							class={ "flex-1", getColorClass(day.Uptime) }
+							class={ "w-full h-3", getColorClass(day.Uptime) }
 							title={ fmt.Sprintf("%s: %.1f%%", day.Date, day.Uptime) }
 						></div>
 					}
-				} else {
-					<div class="text-xs text-zinc-600 italic">No data yet</div>
-				}
-			</div>
+				</div>
+				<!-- Desktop: Horizontal bar -->
+				<div class="hidden md:flex gap-[1px] h-4">
+					for _, day := range t.DailyHistory {
+						<div
+							class={ "flex-1 transition-all hover:h-6 hover:-translate-y-1", getColorClass(day.Uptime) }
+							title={ fmt.Sprintf("%s: %.1f%%", day.Date, day.Uptime) }
+						></div>
+					}
+				</div>
+			} else {
+				<div class="text-xs text-zinc-600 italic">No data yet</div>
+			}
 		</div>
 	</div>
 }

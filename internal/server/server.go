@@ -44,6 +44,8 @@ func (s *Server) Start() {
 	http.HandleFunc("/api/pings/paginate", s.PaginatePings)
 	http.HandleFunc("/api/targets", s.GetDistinctTargets)
 	http.HandleFunc("/api/targets/html", s.GetTargetsHTML)
+	http.HandleFunc("/api/targets/{target}/export", s.PerTargetExport)
+	http.HandleFunc("/api/export/all", s.ExportAll)
 
 	fmt.Print("[OK]\n")
 	fmt.Println("Local Machine: http://127.0.0.1:8080")

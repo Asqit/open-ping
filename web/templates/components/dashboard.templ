@@ -1,17 +1,46 @@
 package components
 
 templ Dashboard() {
-	<div class="mb-8 border-b border-zinc-800 pb-4 flex justify-between items-center">
-		<h1 class="text-sm font-bold tracking-widest uppercase">OPEN-PING DASHBOARD</h1>
-		<span class="text-sm italic text-zinc-500">Auto-refresh: 60s</span>
+	<div class="mb-6 md:mb-8 border-b border-zinc-800 pb-3 md:pb-4">
+		<div class="flex justify-between items-center mb-3 md:mb-4 gap-2">
+			<h1 class="text-xs md:text-sm font-bold tracking-widest uppercase">OPEN-PING DASHBOARD</h1>
+			<a
+				href="/api/export/all"
+				download
+				class="px-2 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-bold border border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-600 transition-all flex items-center gap-1 md:gap-2 whitespace-nowrap"
+			>
+				<span>↓</span>
+				<span class="hidden sm:inline">EXPORT ALL DATA</span>
+				<span class="sm:hidden">EXPORT</span>
+			</a>
+		</div>
+		<div class="flex flex-wrap gap-3 md:gap-6 text-[10px] md:text-xs">
+			<div class="flex items-center gap-1.5 md:gap-2">
+				<span class="w-2 h-2 md:w-3 md:h-3 bg-green-500"></span>
+				<span class="text-zinc-400">ONLINE (95-100%)</span>
+			</div>
+			<div class="flex items-center gap-1.5 md:gap-2">
+				<span class="w-2 h-2 md:w-3 md:h-3 bg-yellow-500"></span>
+				<span class="text-zinc-400">DEGRADED (80-94%)</span>
+			</div>
+			<div class="flex items-center gap-1.5 md:gap-2">
+				<span class="w-2 h-2 md:w-3 md:h-3 bg-red-500"></span>
+				<span class="text-zinc-400">DOWN (&lt;80%)</span>
+			</div>
+		</div>
 	</div>
 	<div
 		id="targets-grid"
-		class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+		class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-fade-in"
 		hx-get="/api/targets/html"
-		hx-trigger="load, every 60s"
-		hx-swap="innerHTML"
+		hx-trigger="load, every 30s"
+		hx-swap="innerHTML swap:0.3s"
 	>
 		<!-- HTMX fills this with TargetList -->
+	</div>
+	<!-- Auto-refresh indicator -->
+	<div class="fixed bottom-4 right-4 flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border border-zinc-800 text-xs text-zinc-500 backdrop-blur-sm">
+		<span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+		<span>Auto-refresh: 30s</span>
 	</div>
 }
